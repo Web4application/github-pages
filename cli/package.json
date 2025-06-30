@@ -1,0 +1,11 @@
+{
+  "name": "create-demo-vue",
+  "version": "1.0.0",
+  "description": "CLI to scaffold demo Vue projects",
+  "bin": {
+    "create-demo-vue": "index.js"
+  },
+  "dependencies": {
+    "ncp": "^2.0.0"
+  }
+}
