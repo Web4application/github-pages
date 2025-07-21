@@ -19,7 +19,7 @@
   "dependencies": {
     "vue": "^3.4.0",
     "vue-router": "^4.2.5",
-    "@primer/css": "22.0.0"
+    "@primer/css": "22.0.1"
   },
   "devDependencies": {
     "vite": "^5.0.0",
