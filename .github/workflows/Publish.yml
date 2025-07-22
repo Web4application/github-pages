@@ -18,7 +18,7 @@ jobs:
       - name: 🟢 Setup Node
         uses: actions/setup-node@v6.0.1
         with:
-          node-version: 20.16.0
+          node-version: 22.17.1
 
       - name: 📦 Install Dependencies
         run: npm ci
