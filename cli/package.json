@@ -1,7 +1,7 @@
 {
-  "name": "create-demo-vue",
+  "name": "github-pages",
   "version": "1.0.0",
-  "description": "CLI to scaffold demo Vue projects",
+  "description": "CLI to scaffold demo github-pages projects",
   "bin": {
     "create-demo-vue": "index.js"
   },
