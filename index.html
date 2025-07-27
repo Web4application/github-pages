@@ -1,10 +1,206 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Web4 Project</title>
-</head>
-<body>
-  <h1>Welcome to Web4</h1>
-  <p>This is a GitHub Pages deployment!</p>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Web4 — The Intelligent Internet</title>
+  <style>
+    :root {
+      --bg-color: #1b1f24;
+      --text-color: #f5f5f5;
+      --accent-color: #00ffa2;
+    }
+
+    [data-theme='light'] {
+      --bg-color: #f5f5f5;
+      --text-color: #1b1f24;
+      --accent-color: #007f5f;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+
+    header, footer {
+      background: #111;
+      text-align: center;
+      padding: 1.5rem;
+      color: #ccc;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+    }
+
+    main {
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h2 {
+      border-left: 4px solid var(--accent-color);
+      padding-left: 1rem;
+      color: var(--accent-color);
+    }
+
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .iframe-wrapper {
+      width: 100%;
+      height: 600px;
+      border: 2px solid var(--accent-color);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .iframe-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+      <pre id="signed_tx">No transaction yet</pre>
+    </section>
+<script>
+const lessons = {
+  iot: [
+    "🔌 What is IoT? Understanding Smart Devices",
+    "📡 Getting Started with MQTT Protocol",
+    "🌐 Connecting Arduino to Web4",
+    "📊 Sending Sensor Data to the Blockchain",
+    "🧠 AI + IoT: Predictive Maintenance"
+  ],
+  blockchain: [
+    "📘 Smart Contracts 101",
+    "🔗 Deploying Contracts on Fadaka Chain",
+    "💸 Creating Your Own Token (ERC-20)",
+    "🛠 Interacting with Contracts via Web3",
+    "📈 Tokenomics in Decentralized Systems"
+  ],
+  web: [
+    "🧱 HTML + CSS Fundamentals",
+    "⚛️ Modern JS + React Basics",
+    "🌐 Building a Web3 App with ethers.js",
+    "📲 Responsive Web4 Interfaces",
+    "🔐 Web Wallet Auth with Fadaka"
+  ],
+  ai: [
+    "🧠 Machine Learning Basics",
+    "🤖 Building a GPT Chatbot",
+    "📊 Training Models on CSVs",
+    "🛠 Deploy AI on Microcontrollers",
+    "🎓 Building an AI Tutor for IoT"
+  ]
+};
+
+function loadLessons(topic) {
+  const list = lessons[topic] || [];
+  document.getElementById("lesson-list").innerHTML = `
+    <h3 style="margin-bottom: 1rem; color: #00ffaa;">${topic.toUpperCase()} Lessons:</h3>
+    <ul style="list-style-type: none; padding-left: 0;">
+      ${list.map(item => `<li style="padding: 0.5rem 0; border-bottom: 1px solid #333;">${item}</li>`).join("")}
+    </ul>
+  `;
+}
+</script>
+    <script>
+let chatMessages = [];
+
+function sendChat() {
+  const name = document.getElementById('chat-name').value || 'Anonymous';
+  const location = document.getElementById('chat-location').value || '🌍 Earth';
+  const message = document.getElementById('chat-msg').value;
+
+  if (!message.trim()) return;
+
+  const time = new Date().toLocaleTimeString();
+  chatMessages.push({ name, location, message, time });
+
+  updateChatBox();
+  document.getElementById('chat-msg').value = '';
+}
+
+function updateChatBox() {
+  const box = document.getElementById('chat-box');
+  box.innerHTML = chatMessages.map(msg =>
+    `<div style="margin-bottom: 1rem;">
+      <strong style="color: #00ffaa;">${msg.name}</strong> from <span style="color: #ccc;">${msg.location}</span> at <small>${msg.time}</small><br/>
+      <span style="color:#eee;">${msg.message}</span>
+    </div>`
+  ).join('');
+}
+</script>
+    <section>
+      <h2>📘 Documentation</h2>
+      <p>Visit the <a href="../docs/index.md">Docs folder</a> or use MkDocs to build and host it live.</p>
+    </section>
+
+    <section>
+      <h2>🌍 Project Repositories</h2>
+      <ul>
+        <li><a href="https://github.com/Web4application/fadaka-blockchain">Fadaka Blockchain</a></li>
+        <li><a href="https://github.com/Web4application/project_pilot_ai">ProjectPilot AI</a></li>
+        <li><a href="https://github.com/Web4application/congen">Congen-AI Trainer</a></li>
+        <li><a href="https://github.com/Web4application/Bizz">Bizz Automation</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    Built by <a href="https://github.com/Web4application" target="_blank">Web4Application</a> © 2025
+  </footer>
+
+  <script>
+    const backendURL = window.location.hostname.includes("localhost")
+      ? "http://localhost:8000"
+      : "https://your-backend-url.onrender.com"; // UPDATE THIS after backend deployment
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch(backendURL + "/status");
+        const data = await res.json();
+        document.getElementById("status").innerText =
+          `🟢 Height: ${data.block_height}, Peers: ${data.peers}, Faucet: ${data.faucet_supply}`;
+      } catch (e) {
+        document.getElementById("status").innerText = "🔴 Cannot connect to backend.";
+      }
+    }
+
+    async function signTransaction() {
+      const tx = {
+        from_: document.getElementById("from").value,
+        to: document.getElementById("to").value,
+        amount: document.getElementById("amount").value,
+        gas: document.getElementById("gas").value,
+        private_key: document.getElementById("private_key").value,
+      };
+
+      const res = await fetch(backendURL + "/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tx),
+      });
+
+      const result = await res.json();
+      document.getElementById("signed_tx").innerText = result.signed_tx;
+    }
+
+    window.onload = fetchStatus;
+  </script>
+
 </body>
 </html>
