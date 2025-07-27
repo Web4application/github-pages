@@ -13,3 +13,7 @@ git checkout gh-pages
 cp -r dist/* .
 git commit -am "Deploy"
 git push origin gh-pages
+
+git add --all
+git commit -m "Initial commit"
+git push -u origin main
