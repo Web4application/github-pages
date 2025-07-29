@@ -1,5 +1,25 @@
+/* Enhanced styles for modern look */
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  font-family: 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  margin: 1rem;
+}
+
+h1, h2, h3 {
+  color: #2c3e50;
+}
+
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 1rem;
+  }
 }
