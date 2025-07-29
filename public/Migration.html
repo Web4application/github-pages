@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Migration guide for the project - GitHub Pages site">
+<meta name="keywords" content="Migration, Guide, GitHub Pages, HTML, Documentation">
+<meta name="author" content="RODAAI">
+<title>Migration Guide</title>
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Migration | kubu-hai.model.h5</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Migration" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="https://web4application.github.io/kubu-hai.model.h5/MIGRATION.html" />
+<meta property="og:url" content="https://web4application.github.io/kubu-hai.model.h5/MIGRATION.html" />
+<meta property="og:site_name" content="kubu-hai.model.h5" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Migration" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","headline":"Migration","url":"https://web4application.github.io/kubu-hai.model.h5/MIGRATION.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/kubu-hai.model.h5/assets/css/style.css?v=375317d232cfe50158954c9adb41c3b01c6e3e20">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/kubu-hai.model.h5/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+      <h1><a href="https://web4application.github.io/kubu-hai.model.h5/">kubu-hai.model.h5</a></h1>
+      
+
+      <h1 id="migration">Migration</h1>
+
+<ul>
+  <li><a href="#migration">Migration</a>
+    <ul>
+      <li><a href="#multiple-uploads-to-the-same-named-artifact">Multiple uploads to the same named Artifact</a></li>
+      <li><a href="#overwriting-an-artifact">Overwriting an Artifact</a></li>
+      <li><a href="#merging-multiple-artifacts">Merging multiple artifacts</a></li>
+      <li><a href="#working-with-immutable-artifacts">Working with Immutable Artifacts</a></li>
+    </ul>
+  </li>
+</ul>
+
+<p>Several behavioral differences exist between Artifact actions <code class="language-plaintext highlighter-rouge">v3</code> and below vs <code class="language-plaintext highlighter-rouge">v4</code>. This document outlines common scenarios in <code class="language-plaintext highlighter-rouge">v3</code>, and how they would be handled in <code class="language-plaintext highlighter-rouge">v4</code>.</p>
+
+<h2 id="multiple-uploads-to-the-same-named-artifact">Multiple uploads to the same named Artifact</h2>
+
+<p>In <code class="language-plaintext highlighter-rouge">v3</code>, Artifacts are <em>mutable</em> so it’s possible to write workflow scenarios where multiple jobs upload to the same Artifact like so:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">upload</span><span class="pi">:</span>
+    <span class="na">strategy</span><span class="pi">:</span>
+      <span class="na">matrix</span><span class="pi">:</span>
+        <span class="na">runs-on</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">ubuntu-latest</span><span class="pi">,</span> <span class="nv">macos-latest</span><span class="pi">,</span> <span class="nv">windows-latest</span><span class="pi">]</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">$</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create a File</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">echo "hello from $" &gt; file-$.txt</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload Artifact</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-artifact@v3</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">my-artifact</span> <span class="c1"># NOTE: same artifact name</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">file-$.txt</span>
+  <span class="na">download</span><span class="pi">:</span>
+    <span class="na">needs</span><span class="pi">:</span> <span class="s">upload</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Download All Artifacts</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/download-artifact@v3</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">my-artifact</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">my-artifact</span>
+      <span class="pi">-</span> <span class="na">run</span><span class="pi">:</span> <span class="s">ls -R my-artifact</span>
+</code></pre></div></div>
+
+<p>This results in a directory like so:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>my-artifact/
+  file-macos-latest.txt
+  file-ubuntu-latest.txt
+  file-windows-latest.txt
+</code></pre></div></div>
+
+<p>In v4, Artifacts are immutable (unless deleted). So you must change each of the uploaded Artifacts to have a different name and filter the downloads by name to achieve the same effect:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">jobs:
+</span>  upload:
+    strategy:
+      matrix:
+        runs-on: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: $
+    steps:
+    - name: Create a File
+      run: echo "hello from $" &gt; file-$.txt
+    - name: Upload Artifact
+<span class="gd">-     uses: actions/upload-artifact@v3
+</span><span class="gi">+     uses: actions/upload-artifact@v4
+</span>      with:
+<span class="gd">-       name: my-artifact
+</span><span class="gi">+       name: my-artifact-$
+</span>        path: file-$.txt
+  download:
+    needs: upload
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download All Artifacts
+<span class="gd">-     uses: actions/download-artifact@v3
+</span><span class="gi">+     uses: actions/download-artifact@v4
+</span>      with:
+<span class="gd">-       name: my-artifact
+</span>        path: my-artifact
+<span class="gi">+       pattern: my-artifact-*
++       merge-multiple: true
+</span>    - run: ls -R my-artifact
+</code></pre></div></div>
+
+<p>In <code class="language-plaintext highlighter-rouge">v4</code>, the new <code class="language-plaintext highlighter-rouge">pattern:</code> input will filter the downloaded Artifacts to match the name specified. The new <code class="language-plaintext highlighter-rouge">merge-multiple:</code> input will support downloading multiple Artifacts to the same directory. If the files within the Artifacts have the same name, the last writer wins.</p>
+
+<h2 id="overwriting-an-artifact">Overwriting an Artifact</h2>
+
+<p>In <code class="language-plaintext highlighter-rouge">v3</code>, the contents of an Artifact were mutable so something like the following was possible:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">upload</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create a file</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">echo "hello world" &gt; my-file.txt</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload Artifact</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-artifact@v3</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">my-artifact</span> <span class="c1"># NOTE: same artifact name</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">my-file.txt</span>
+  <span class="na">upload-again</span><span class="pi">:</span>
+    <span class="na">needs</span><span class="pi">:</span> <span class="s">upload</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create a different file</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">echo "goodbye world" &gt; my-file.txt</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload Artifact</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-artifact@v3</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">my-artifact</span> <span class="c1"># NOTE: same artifact name</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">my-file.txt</span>
+</code></pre></div></div>
+
+<p>The resulting <code class="language-plaintext highlighter-rouge">my-file.txt</code> in <code class="language-plaintext highlighter-rouge">my-artifact</code> will have “goodbye world” as the content.</p>
+
+<p>In <code class="language-plaintext highlighter-rouge">v4</code>, Artifacts are immutable unless deleted. To achieve this same behavior, you can use <code class="language-plaintext highlighter-rouge">overwrite: true</code> to delete the Artifact before a new one is created:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">jobs:
+</span>  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a file
+        run: echo "hello world" &gt; my-file.txt
+      - name: Upload Artifact
+<span class="gd">-       uses: actions/upload-artifact@v3
+</span><span class="gi">+       uses: actions/upload-artifact@v4
+</span>        with:
+          name: my-artifact # NOTE: same artifact name
+          path: my-file.txt
+  upload-again:
+    needs: upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a different file
+        run: echo "goodbye world" &gt; my-file.txt
+      - name: Upload Artifact
+<span class="gd">-       uses: actions/upload-artifact@v3
+</span><span class="gi">+       uses: actions/upload-artifact@v4
+</span>        with:
+          name: my-artifact # NOTE: same artifact name
+          path: my-file.txt
+<span class="gi">+         overwrite: true
+</span></code></pre></div></div>
+
+<p>Note that this will create an <em>entirely</em> new Artifact, with a different ID from the previous.</p>
+
+<h2 id="merging-multiple-artifacts">Merging multiple artifacts</h2>
+
+<p>In <code class="language-plaintext highlighter-rouge">v3</code>, multiple uploads from multiple jobs could be done to the same Artifact. This would result in a single archive, which could be useful for sending to upstream systems outside of Actions via API or UI downloads.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">upload</span><span class="pi">:</span>
+    <span class="na">strategy</span><span class="pi">:</span>
+      <span class="na">matrix</span><span class="pi">:</span>
+        <span class="na">runs-on</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">ubuntu-latest</span><span class="pi">,</span> <span class="nv">macos-latest</span><span class="pi">,</span> <span class="nv">windows-latest</span><span class="pi">]</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">$</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create a File</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">echo "hello from $" &gt; file-$.txt</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload Artifact</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-artifact@v3</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">all-my-files</span> <span class="c1"># NOTE: same artifact name</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">file-$.txt</span>
+</code></pre></div></div>
+
+<p>The single <code class="language-plaintext highlighter-rouge">all-my-files</code> artifact would contain the following:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+  ∟ file-ubuntu-latest.txt
+  ∟ file-macos-latest.txt
+  ∟ file-windows-latest.txt
+</code></pre></div></div>
+
+<p>To achieve the same in <code class="language-plaintext highlighter-rouge">v4</code> you can change it like so:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">jobs:
+</span>  upload:
+    strategy:
+      matrix:
+        runs-on: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: $
+    steps:
+      - name: Create a File
+        run: echo "hello from $" &gt; file-$.txt
+      - name: Upload Artifact
+<span class="gd">-       uses: actions/upload-artifact@v3
+</span><span class="gi">+       uses: actions/upload-artifact@v4
+</span>        with:
+<span class="gd">-         name: all-my-files
+</span><span class="gi">+         name: my-artifact-$
+</span>          path: file-$.txt
+<span class="gi">+ merge:
++   runs-on: ubuntu-latest
++   needs: upload
++   steps:
++     - name: Merge Artifacts
++       uses: actions/upload-artifact/merge@v4
++       with:
++         name: all-my-files
++         pattern: my-artifact-*
+</span></code></pre></div></div>
+
+<p>Note that this will download all artifacts to a temporary directory and reupload them as a single artifact. For more information on inputs and other use cases for <code class="language-plaintext highlighter-rouge">actions/upload-artifact/merge@v4</code>, see <a href="https://github.com/actions/upload-artifact/blob/main/merge/README.md">the action documentation</a>.</p>
+
+<h2 id="working-with-immutable-artifacts">Working with Immutable Artifacts</h2>
+
+<p>In <code class="language-plaintext highlighter-rouge">v4</code>, artifacts are immutable by default and each artifact gets a unique ID when uploaded. When an artifact with the same name is uploaded again (with or without <code class="language-plaintext highlighter-rouge">overwrite: true</code>), it gets a new artifact ID.</p>
+
+<p>To take advantage of this immutability for security purposes (to avoid potential TOCTOU issues where an artifact might be replaced between upload and download), the new <code class="language-plaintext highlighter-rouge">artifact-ids</code> input allows you to download artifacts by their specific ID rather than by name:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">upload</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+
+    <span class="c1"># Make the artifact ID available to the download job</span>
+    <span class="na">outputs</span><span class="pi">:</span>
+      <span class="na">artifact-id</span><span class="pi">:</span> <span class="s">$</span>
+
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create a file</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">echo "hello world" &gt; my-file.txt</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload Artifact</span>
+        <span class="na">id</span><span class="pi">:</span> <span class="s">upload-step</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-artifact@v4</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">my-artifact</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">my-file.txt</span>
+      <span class="c1"># The upload step outputs the artifact ID</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Print Artifact ID</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="s">echo "Artifact ID is $"</span>
+
+  <span class="na">download</span><span class="pi">:</span>
+    <span class="na">needs</span><span class="pi">:</span> <span class="s">upload</span>
+
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Download Artifact by ID</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/download-artifact@v4</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="c1"># Use the artifact ID directly, not the name, to ensure you get exactly the artifact you expect</span>
+          <span class="na">artifact-ids</span><span class="pi">:</span> <span class="s">$</span>
+</code></pre></div></div>
+
+<p>This approach provides stronger guarantees about which artifact version you’re downloading compared to using just the artifact name.</p>
+
+      <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
+        This site is open source. <a href="https://github.com/Web4application/kubu-hai.model.h5/edit/main/docs/MIGRATION.md">Improve this page</a>.
+      </div>
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
+</html>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>
