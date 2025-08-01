@@ -1,17 +1,4 @@
 #!/usr/bin/env node
-const envInit = require('./commands/env-init');
-
-const command = process.argv[2];
-
-switch (command) {
-  case 'env:init':
-    envInit();
-    break;
-
-  // other cases...
-  default:
-    console.log('Usage: web4cli <command>\nCommands: init, env:init');
-}
 
 const fs = require('fs');
 const path = require('path');
@@ -20,10 +7,10 @@ const { Command } = require('commander');
 const inquirer = require('inquirer');
 const os = require('os');
 
+const program = new Command();
 const CONFIG_PATH = path.join(os.homedir(), '.web4clirc');
 
-const program = new Command();
-
+// Utility Functions
 function copyFolder(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
   for (const item of fs.readdirSync(src)) {
@@ -46,6 +33,7 @@ function loadConfig() {
   return {};
 }
 
+// 🧱 Init Project Command
 program
   .command('init')
   .description('Create a new Web4App project')
@@ -100,7 +88,7 @@ program
       try {
         execSync('git init', { stdio: 'inherit' });
         console.log('✅ Git initialized');
-      } catch (err) {
+      } catch {
         console.warn('⚠️ Git init failed');
       }
     }
@@ -109,7 +97,7 @@ program
       try {
         execSync('npm install', { stdio: 'inherit' });
         console.log('📦 Dependencies installed');
-      } catch (err) {
+      } catch {
         console.warn('⚠️ Install failed');
       }
     }
@@ -117,6 +105,7 @@ program
     console.log(`🚀 Done! Project "${answers.name}" is ready.`);
   });
 
+// ⚙️ Config Command
 program
   .command('config')
   .description('Save global defaults')
@@ -143,6 +132,44 @@ program
     ]);
     saveConfig(configAnswers);
     console.log('✅ Saved config:', configAnswers);
+  });
+
+// 📦 env:init Command
+program
+  .command('env:init')
+  .description('Generate .env, .env.py and config.py files')
+  .action(() => {
+    const targetDir = process.cwd();
+    const envPath = path.join(targetDir, '.env');
+    const envPyPath = path.join(targetDir, '.env.py');
+    const configPyPath = path.join(targetDir, 'config.py');
+
+    const envContent = `API_URL=https://api.example.com\nDEBUG=True\nPROJECT_NAME=Web4App\n`;
+    const envPyContent = `API_URL = "https://api.example.com"\nDEBUG = True\nPROJECT_NAME = "Web4App"\n`;
+    const configContent = `
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+try:
+    import .env as pyenv
+except ImportError:
+    pyenv = None
+
+API_URL = os.getenv("API_URL") or getattr(pyenv, "API_URL", "http://localhost")
+DEBUG = (os.getenv("DEBUG") or str(getattr(pyenv, "DEBUG", False))) == "True"
+PROJECT_NAME = os.getenv("PROJECT_NAME") or getattr(pyenv, "PROJECT_NAME", "UnnamedApp")
+`.trimStart();
+
+    fs.writeFileSync(envPath, envContent);
+    fs.writeFileSync(envPyPath, envPyContent);
+    fs.writeFileSync(configPyPath, configContent);
+
+    console.log('✅ Environment files created:');
+    console.log(`  - ${envPath}`);
+    console.log(`  - ${envPyPath}`);
+    console.log(`  - ${configPyPath}`);
   });
 
 program.parse();
