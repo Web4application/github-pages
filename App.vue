@@ -260,3 +260,6 @@ body {
   }
 }
 </style>
+<script setup lang="ts">
+import MigrationPage from './components/MigrationPage.vue'
+</script>
