@@ -17,3 +17,7 @@ git push origin gh-pages
 git add --all
 git commit -m "Initial commit"
 git push -u origin main
+
+npm install
+npm login   # (only once)
+npm publish
