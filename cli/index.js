@@ -1,4 +1,17 @@
 #!/usr/bin/env node
+const envInit = require('./commands/env-init');
+
+const command = process.argv[2];
+
+switch (command) {
+  case 'env:init':
+    envInit();
+    break;
+
+  // other cases...
+  default:
+    console.log('Usage: web4cli <command>\nCommands: init, env:init');
+}
 
 const fs = require('fs');
 const path = require('path');
