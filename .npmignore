@@ -1,1 +1,27 @@
+# Node dependencies
+node_modules
+npm-debug.log
+package-lock.json
 
+# Template node_modules (if accidentally copied)
+template/**/node_modules
+
+# OS/system files
+.DS_Store
+Thumbs.db
+
+# Source control
+.git
+.gitignore
+
+# Dev tools or temp files
+.vscode
+.idea
+*.log
+*.zip
+
+# Optional: exclude tests or build artifacts
+test/
+tests/
+dist/
+build/
