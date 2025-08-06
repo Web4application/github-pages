@@ -22,7 +22,7 @@ jobs:
         numOfAssignee: 1
 
     - name: Add label to issues
-      uses: actions-ecosystem/action-add-labels@v1
+      uses: actions-ecosystem/action-add-labels@v6.0.1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         labels: needs-triage
