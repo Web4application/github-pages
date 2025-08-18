@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import multer from "multer";
+import rateLimit from "express-rate-limit";
 import { GoogleGenerativeAI } from "google-generative-ai";
 import { requireAuth } from "./auth";
 import { RAG } from "./rag";
@@ -14,7 +15,6 @@ const rag = new RAG(process.env.GOOGLE_API_KEY as string);
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
-
 // Health
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
@@ -43,7 +43,7 @@ app.get("/api/rag/search", requireAuth, async (req, res) => {
 });
 
 // --- Chat (SSE streaming), pulls top-k RAG context automatically
-app.post("/api/chat/stream", requireAuth, async (req, res) => {
+app.post("/api/chat/stream", chatStreamLimiter, requireAuth, async (req, res) => {
   const { message, history = [] } = req.body || {};
   if (!message) return res.status(400).json({ error: "message required" });
 

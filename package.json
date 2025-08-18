@@ -4,7 +4,12 @@
   "description": "A sample Vue + Tailwind project",
   "author": "Kubu Lee",
   "license": "MIT",
-  "keywords": ["vue", "vite", "tailwind", "typescript"],
+  "keywords": [
+    "vue",
+    "vite",
+    "tailwind",
+    "typescript"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/Web4application/demo-repo.git"
@@ -19,7 +24,8 @@
   "dependencies": {
     "vue": "^3.4.0",
     "vue-router": "^4.2.5",
-    "@primer/css": "22.0.1"
+    "@primer/css": "22.0.1",
+    "express-rate-limit": "^8.0.1"
   },
   "devDependencies": {
     "vite": "^7.0.0",
