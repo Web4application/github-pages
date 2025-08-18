@@ -9,4 +9,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Vercel Deploy Hook
-        run: curl -X POST "${{ secrets.https://demo-repository-6jgmdwv9g-web4application.vercel.app }}"
+        run: curl -X POST "${{ secrets.demo-repository-6jgmdwv9g-web4application.vercel.app }}"
