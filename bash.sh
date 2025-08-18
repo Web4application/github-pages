@@ -1,3 +1,7 @@
+–––
+
+```
+@dependabot:  git rebase --continue
  npm install
  npm run dev
 
@@ -40,3 +44,4 @@ npx ts-node src/index.ts
 
 npm run dev
 # open http://localhost:5173/chat (after logging in)
+```
