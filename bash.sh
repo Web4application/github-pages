@@ -21,3 +21,13 @@ git push -u origin main
 npm install
 npm login   # (only once)
 npm publish
+
+cd server
+npm init -y
+npm i express cors google-generative-ai firebase-admin multer pdf-parse
+npm i -D typescript ts-node @types/node @types/express @types/cors @types/multer
+npx tsc --init
+
+cd ../
+npm i firebase
+# (you already have vue-router / vite in the project)
