@@ -1,17 +1,58 @@
-name: Deploy to Vercel
+name: CI & Deploy (Vue + Vercel + pnpm)
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ "**" ]
 
 jobs:
-  build-deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      deployments: write
+
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node & pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: '22'
-      - run: npm install
-      - run: npm run build
+          version: 9
+          run_install: true
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Vercel Pull (Preview)
+        if: github.event_name == 'pull_request'
+        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+
+      - name: Vercel Pull (Production)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Build
+        run: vercel build --token=$VERCEL_TOKEN
+
+      - name: Deploy Preview
+        if: github.event_name == 'pull_request'
+        run: vercel deploy --prebuilt --token=$VERCEL_TOKEN
+
+      - name: Deploy Production
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
