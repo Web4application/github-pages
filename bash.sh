@@ -1,6 +1,12 @@
-–––
+# Set API key (production)
+vercel secrets add api-url https://api.myapp.com
 
-```
+# Set database URL (production)
+vercel secrets add db-url postgres://user:password@host:5432/db
+
+# Preview env with staging URLs
+vercel secrets add api-url-staging https://staging-api.myapp.com
+vercel secrets add db-url-staging postgres://staging_user:pw@staging_host:5432/staging_db
 @dependabot:  git rebase --continue
  npm install
  npm run dev
