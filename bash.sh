@@ -1,5 +1,26 @@
 # Set API key (production)
-vercel secrets add api-url https://api.myapp.com
+vercel secrets add api-url https://app.web4app.com
+# Open a terminal (Command Prompt or PowerShell for Windows, Terminal for macOS or Linux)
+
+# Ensure Git is installed
+# Visit https://git-scm.com to download and install console Git if not already installed
+
+# Clone the repository
+git clone https://github.com/Abblix/Oidc.Server.git
+
+# Navigate to the project directory
+cd Oidc.Server
+
+# Check if .NET SDK is installed
+dotnet --version  # Check the installed version of .NET SDK
+# Visit the official Microsoft website to install or update it if necessary
+
+# Restore dependencies
+dotnet restore
+
+# Compile the project
+dotnet build
+
 
 # Set database URL (production)
 vercel secrets add db-url postgres://user:password@host:5432/db
