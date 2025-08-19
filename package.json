@@ -1,9 +1,10 @@
 {
-  "name": "demo-repo",
+  "name": "web4app",
   "version": "0.2.0",
   "description": "A sample Vue + Tailwind project",
   "author": "Kubu Lee",
   "license": "MIT",
+  "private": true,
   "keywords": ["vue", "vite", "tailwind", "typescript"],
   "repository": {
     "type": "git",
@@ -12,22 +13,28 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview",
+    "preview": "vite preview --host",
     "type-check": "vue-tsc --noEmit",
-    "lint": "eslint . --ext .vue,.ts,.js"
+    "lint": "eslint --ext .vue,.js,.ts src",
+    "test": "vitest run",
+    "vercel-build": "vite build"
   },
   "dependencies": {
     "vue": "^3.4.0",
     "vue-router": "^4.2.5",
-    "@primer/css": "22.0.1"
+    "@primer/css": "22.0.1",
+    "express-rate-limit": "^8.0.1"
   },
   "devDependencies": {
-    "vite": "^7.0.0",
-    "typescript": "^5.0.0",
-    "vue-tsc": "^3.0.0",
-    "tailwindcss": "^4.0.0",
-    "postcss": "^8.4.24",
+    "@vitejs/plugin-vue": "^5.0.0",
     "autoprefixer": "^10.4.15",
-    "eslint": "^9.0.0"
+    "eslint": "^9.0.0",
+    "eslint-plugin-vue": "^9.0.0",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.5.0",
+    "vite": "^5.0.0",
+    "vitest": "^2.0.0",
+    "vue-tsc": "^3.0.0"
   }
 }
