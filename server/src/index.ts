@@ -32,7 +32,11 @@ app.post("/api/rag/upload", requireAuth, upload.single("file"), async (req, res)
 });
 
 // --- RAG: search
-app.get("/api/rag/search", requireAuth, async (req, res) => {
+const ragSearchLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP/user to 100 requests per windowMs
+});
+app.get("/api/rag/search", ragSearchLimiter, requireAuth, async (req, res) => {
   try {
     const q = String(req.query.q || "");
     const results = await rag.searchWithVector(q, 5);
